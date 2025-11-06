@@ -19,7 +19,6 @@ public record ArticleResponseDto(
 		LocalDateTime createdAt,
 		WrittenByResponseDto writtenBy
 ) {
-	
 	public static ArticleResponseDto fromEntity(
 			Article article, User user) {
 		return new ArticleResponseDto(article.getId(), article.getTitle(), article.getLikeCount(), article.getCommentCount(), article.getViewCount(), article.getCreatedAt(),

@@ -10,7 +10,7 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -41,10 +41,10 @@ public class User extends BaseEntity {
 	private LocalDateTime deletedAt;
 	
 	@OneToMany(mappedBy = "user")
-	private ArrayList<Article> articles;
+	private List<Article> articles;
 	
 	@OneToMany(mappedBy = "user")
-	private ArrayList<Comment> comments;
+	private List<Comment> comments;
 	
 	
 	public User(String nickname, String password, String email, String profileImage) {

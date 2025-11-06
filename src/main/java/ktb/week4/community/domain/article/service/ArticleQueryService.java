@@ -6,6 +6,7 @@ import ktb.week4.community.domain.article.entity.Article;
 import ktb.week4.community.domain.article.repository.ArticleRepository;
 import ktb.week4.community.domain.user.entity.User;
 import ktb.week4.community.domain.article.loader.ArticleLoader;
+import ktb.week4.community.domain.user.enums.Status;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -23,16 +24,12 @@ public class ArticleQueryService {
 	private final ArticleLoader articleLoader;
 
     public GetArticlesResponseDto getArticles(int page, int size) {
-        Page<Article> articles = articleRepository.findAll(PageRequest.of(page-1, size));
-		List<User> users = articles.stream()
-				.map(Article::getUser)
-				.distinct()
-				.toList();
+        Page<Article> articles = articleRepository.findAllBy(PageRequest.of(page-1, size));
 		
 		List<ArticleResponseDto> responses = articles.stream()
                 .map(article -> {
 					User user = article.getUser();
-					if(user == null) {
+					if(user == null || user.getStatus() == Status.INACTIVE) {
 						return ArticleResponseDto.fromEntity(article);
 					}
                     return ArticleResponseDto.fromEntity(article, user);

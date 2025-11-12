@@ -14,9 +14,11 @@ import ktb.week4.community.domain.comment.loader.CommentLoader;
 import ktb.week4.community.domain.user.loader.UserLoader;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class CommentCommandService {
 	
 	private final CommentRepository commentRepository;

@@ -15,6 +15,7 @@ public enum ErrorCode implements BaseErrorCode {
 	UNAUTHORIZED_REQUEST(HttpStatus.UNAUTHORIZED, "AUTH401", "unauthorized_request"),
 	FORBIDDEN_REQUEST(HttpStatus.FORBIDDEN, "AUTH403", "forbidden_request"),
 	EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "email_already_exists"),
+	NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "nickname_already_exists"),
 	
 	// 유저
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4004", "User not found"),

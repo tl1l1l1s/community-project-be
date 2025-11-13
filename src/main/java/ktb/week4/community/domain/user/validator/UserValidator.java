@@ -16,4 +16,10 @@ public class UserValidator {
 			throw new GeneralException(ErrorCode.EMAIL_ALREADY_EXISTS);
 		}
 	}
+	
+	public void validateNicknameIsNotTaken(String nickname) {
+		if (userRepository.findByNickname(nickname).isPresent()) {
+			throw new GeneralException(ErrorCode.NICKNAME_ALREADY_EXISTS);
+		}
+	}
 }

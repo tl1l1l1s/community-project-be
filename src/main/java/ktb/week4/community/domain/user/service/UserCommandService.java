@@ -19,6 +19,7 @@ public class UserCommandService {
 	
 	public SignUpResponseDto createUser(SignUpRequestDto request) {
 		userValidator.validateEmailIsNotTaken(request.email());
+		userValidator.validateNicknameIsNotTaken(request.nickname());
 		
 		User user = userRepository.save(new User(
 				request.nickname(),

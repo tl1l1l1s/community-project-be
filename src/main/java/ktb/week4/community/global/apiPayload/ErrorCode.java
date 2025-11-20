@@ -17,6 +17,9 @@ public enum ErrorCode implements BaseErrorCode {
 	EMAIL_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "email_already_exists"),
 	NICKNAME_ALREADY_EXISTS(HttpStatus.CONFLICT, "AUTH409", "nickname_already_exists"),
 	
+	FILE_UPLOAD_ERROR(HttpStatus.CONFLICT, "AUTH409", "upload_error"),
+	FILE_DELETE_ERROR(HttpStatus.CONFLICT, "AUTH409", "file_delete_error"),
+	
 	// 유저
 	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4004", "User not found"),
 	

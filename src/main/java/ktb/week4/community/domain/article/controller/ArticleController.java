@@ -1,5 +1,6 @@
 package ktb.week4.community.domain.article.controller;
 
+import jakarta.validation.Valid;
 import ktb.week4.community.domain.article.dto.ArticleResponseDto;
 import ktb.week4.community.domain.article.dto.CreateArticleRequestDto;
 import ktb.week4.community.domain.article.dto.GetArticlesResponseDto;
@@ -10,8 +11,10 @@ import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.SuccessCode;
 import ktb.week4.community.global.apiSpecification.ArticleApiSpecification;
 import lombok.AllArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/articles")
@@ -29,20 +32,22 @@ public class ArticleController implements ArticleApiSpecification {
 	}
 	
 	@Override
-	@PostMapping
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<ArticleResponseDto> createArticle(
 			@RequestParam Long userId,
-			@RequestBody CreateArticleRequestDto request) {
-		return ApiResponse.onCreateSuccess(SuccessCode.CREATE_SUCCESS, articleCommandService.createArticle(userId, request));
+			@RequestPart("payload") @Valid CreateArticleRequestDto request,
+			@RequestPart(value = "image", required = false) MultipartFile image) {
+		return ApiResponse.onCreateSuccess(SuccessCode.CREATE_SUCCESS, articleCommandService.createArticle(userId, request, image));
 	}
 	
 	@Override
-	@PatchMapping("/{articleId}")
+	@PatchMapping(value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<ArticleResponseDto> updateArticle(
 			@PathVariable Long articleId,
 			@RequestParam Long userId,
-			@RequestBody UpdateArticleRequestDto request) {
-		return ApiResponse.onSuccess(SuccessCode.UPDATE_SUCCESS, articleCommandService.updateArticle(userId, articleId, request));
+			@RequestPart("payload") @Valid UpdateArticleRequestDto request,
+			@RequestPart(value = "image", required = false) MultipartFile image) {
+		return ApiResponse.onSuccess(SuccessCode.UPDATE_SUCCESS, articleCommandService.updateArticle(userId, articleId, request, image));
 	}
 	
 	@Override

@@ -35,7 +35,7 @@ public class User extends BaseEntity {
 	private Status status;
 	
 	@Column(nullable = false)
-	@ColumnDefault("'default_image.png'")
+	@ColumnDefault("'/upload/user.svg'")
 	private String profileImage;
 	
 	private LocalDateTime deletedAt;

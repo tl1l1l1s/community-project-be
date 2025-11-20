@@ -11,6 +11,7 @@ import ktb.week4.community.domain.article.dto.CreateArticleRequestDto;
 import ktb.week4.community.domain.article.dto.GetArticlesResponseDto;
 import ktb.week4.community.domain.article.dto.UpdateArticleRequestDto;
 import ktb.week4.community.global.apiPayload.ApiResponse;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
 
 @Tag(name = "Article", description = "게시글 관련 API")
@@ -25,13 +26,15 @@ public interface ArticleApiSpecification {
 	ApiResponse<ArticleResponseDto> createArticle(
 			@Parameter(description = "게시글을 생성하는 유저의 id", required = true, example = "1")
 			Long userId,
-			@Valid CreateArticleRequestDto request);
+			@Valid CreateArticleRequestDto request,
+			MultipartFile image);
 	
 	@Operation(summary = "게시글을 수정합니다.")
 	ApiResponse<ArticleResponseDto> updateArticle(
 			@Parameter(description = "수정하고자 하는 게시글의 id", required = true, example = "1") Long articleId,
 			@Parameter(description = "게시글을 수정하는 유저의 id", required = true, example = "1") Long userId,
-			@Valid UpdateArticleRequestDto request);
+			@Valid UpdateArticleRequestDto request,
+			MultipartFile image);
 	
 	@Operation(summary = "게시글을 삭제합니다.")
 	@ApiResponses({

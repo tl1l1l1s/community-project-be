@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import ktb.week4.community.domain.user.dto.*;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.multipart.MultipartFile;
 
 @Tag(name = "User", description = "유저 관련 API")
 public interface UserApiSpecification {
@@ -22,7 +23,8 @@ public interface UserApiSpecification {
 	@Operation(summary = "사용자의 정보를 수정합니다.")
 	ApiResponse<UserResponseDto> updateUser(
 			@Parameter(description = "정보를 수정할 사용자의 id", required = true, example = "1") Long userId,
-			UpdateUserRequestDto request);
+			UpdateUserRequestDto request,
+			MultipartFile profileImage);
 	
 	@Operation(summary = "사용자의 비밀번호를 변경합니다.")
 	ApiResponse<Void> updatePassword(

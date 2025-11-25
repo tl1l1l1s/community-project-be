@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import ktb.week4.community.domain.user.dto.*;
 import ktb.week4.community.domain.user.service.UserCommandService;
 import ktb.week4.community.domain.user.service.UserQueryService;
+import ktb.week4.community.global.annotation.AuthUser;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.SuccessCode;
 import ktb.week4.community.global.apiSpecification.UserApiSpecification;
@@ -31,14 +32,14 @@ public class UserController implements UserApiSpecification {
 	@Override
 	@GetMapping
 	public ApiResponse<UserResponseDto> getUser(
-			@RequestParam Long userId) {
+			@AuthUser Long userId) {
 		return ApiResponse.onSuccess(SuccessCode.SUCCESS, userQueryService.getUser(userId));
 	}
 	
 	@Override
 	@PatchMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<UserResponseDto> updateUser(
-			@RequestParam Long userId,
+			@AuthUser Long userId,
 			@RequestPart("payload") @Valid UpdateUserRequestDto request,
 			@RequestPart(value = "profileImage", required = false) MultipartFile profileImage) {
 		return ApiResponse.onSuccess(SuccessCode.UPDATE_SUCCESS, userCommandService.updateUser(userId, request, profileImage));
@@ -47,7 +48,7 @@ public class UserController implements UserApiSpecification {
 	@Override
 	@PatchMapping("/password")
 	public ApiResponse<Void> updatePassword(
-			@RequestParam Long userId,
+			@AuthUser Long userId,
 			@RequestBody UpdatePasswordRequestDto request) {
 		userCommandService.updatePassword(userId, request);
 		return ApiResponse.onSuccess(SuccessCode.UPDATE_SUCCESS, null);
@@ -56,7 +57,7 @@ public class UserController implements UserApiSpecification {
 	@Override
 	@DeleteMapping
 	public ResponseEntity<Void> deleteUser(
-			@RequestParam Long userId) {
+			@AuthUser Long userId) {
 		userCommandService.deleteUser(userId);
 		return ApiResponse.onDeleteSuccess();
 	}

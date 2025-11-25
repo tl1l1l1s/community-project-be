@@ -1,12 +1,12 @@
-package ktb.week4.community.config;
+package ktb.week4.community.global.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import ktb.week4.community.domain.user.dto.LoginResponseDto;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.SuccessCode;
-import ktb.week4.community.security.CustomAuthenticationEntryPoint;
-import ktb.week4.community.security.CustomUserDetails;
-import ktb.week4.community.security.JwtTokenProvider;
+import ktb.week4.community.security.handler.CustomAuthenticationEntryPoint;
+import ktb.week4.community.security.principal.CustomUserDetails;
+import ktb.week4.community.security.jwt.JwtTokenProvider;
 import ktb.week4.community.security.filter.JsonAuthenticationFilter;
 import ktb.week4.community.security.filter.JwtFilter;
 import lombok.RequiredArgsConstructor;

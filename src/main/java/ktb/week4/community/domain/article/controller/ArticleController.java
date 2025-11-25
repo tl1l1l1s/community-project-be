@@ -7,6 +7,7 @@ import ktb.week4.community.domain.article.dto.GetArticlesResponseDto;
 import ktb.week4.community.domain.article.dto.UpdateArticleRequestDto;
 import ktb.week4.community.domain.article.service.ArticleCommandService;
 import ktb.week4.community.domain.article.service.ArticleQueryService;
+import ktb.week4.community.global.annotation.AuthUser;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.SuccessCode;
 import ktb.week4.community.global.apiSpecification.ArticleApiSpecification;
@@ -34,7 +35,7 @@ public class ArticleController implements ArticleApiSpecification {
 	@Override
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<ArticleResponseDto> createArticle(
-			@RequestParam Long userId,
+			@AuthUser Long userId,
 			@RequestPart("payload") @Valid CreateArticleRequestDto request,
 			@RequestPart(value = "image", required = false) MultipartFile image) {
 		return ApiResponse.onCreateSuccess(SuccessCode.CREATE_SUCCESS, articleCommandService.createArticle(userId, request, image));
@@ -44,7 +45,7 @@ public class ArticleController implements ArticleApiSpecification {
 	@PatchMapping(value = "/{articleId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ApiResponse<ArticleResponseDto> updateArticle(
 			@PathVariable Long articleId,
-			@RequestParam Long userId,
+			@AuthUser Long userId,
 			@RequestPart("payload") @Valid UpdateArticleRequestDto request,
 			@RequestPart(value = "image", required = false) MultipartFile image) {
 		return ApiResponse.onSuccess(SuccessCode.UPDATE_SUCCESS, articleCommandService.updateArticle(userId, articleId, request, image));
@@ -54,7 +55,7 @@ public class ArticleController implements ArticleApiSpecification {
 	@DeleteMapping("/{articleId}")
 	public ResponseEntity<Void> deleteArticle(
 			@PathVariable Long articleId,
-			@RequestParam Long userId) {
+			@AuthUser Long userId) {
 		articleCommandService.deleteArticle(userId, articleId);
 		return ApiResponse.onDeleteSuccess();
 	}

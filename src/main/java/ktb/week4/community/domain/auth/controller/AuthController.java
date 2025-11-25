@@ -9,7 +9,7 @@ import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.ErrorCode;
 import ktb.week4.community.global.apiPayload.SuccessCode;
 import ktb.week4.community.global.apiSpecification.AuthApiSpecification;
-import ktb.week4.community.security.JwtTokenProvider;
+import ktb.week4.community.security.jwt.JwtTokenProvider;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;

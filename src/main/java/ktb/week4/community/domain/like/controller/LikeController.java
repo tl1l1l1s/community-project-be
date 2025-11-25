@@ -3,6 +3,7 @@ package ktb.week4.community.domain.like.controller;
 import ktb.week4.community.domain.like.dto.LikeResponseDto;
 import ktb.week4.community.domain.like.service.LikeCommandService;
 import ktb.week4.community.domain.like.service.LikeQueryService;
+import ktb.week4.community.global.annotation.AuthUser;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.SuccessCode;
 import ktb.week4.community.global.apiSpecification.LikeApiSpecification;
@@ -22,7 +23,7 @@ public class LikeController implements LikeApiSpecification {
     @GetMapping
     public ApiResponse<LikeResponseDto> getLikes(
             @PathVariable Long articleId,
-            @RequestParam Long userId) {
+            @AuthUser Long userId) {
         return ApiResponse.onSuccess(SuccessCode.SUCCESS, likeQueryService.getLikeStatus(articleId, userId));
     }
 	
@@ -30,7 +31,7 @@ public class LikeController implements LikeApiSpecification {
 	@PostMapping
     public ApiResponse<LikeResponseDto> createLike(
 			@PathVariable Long articleId,
-			@RequestParam Long userId) {
+			@AuthUser Long userId) {
         return ApiResponse.onCreateSuccess(SuccessCode.CREATE_SUCCESS, likeCommandService.likeArticle(articleId, userId));
     }
 	
@@ -38,7 +39,7 @@ public class LikeController implements LikeApiSpecification {
     @DeleteMapping
     public ResponseEntity<Void> deleteLike(
             @PathVariable Long articleId,
-			@RequestParam Long userId) {
+			@AuthUser Long userId) {
         likeCommandService.unlikeArticle(articleId, userId);
 		return ApiResponse.onDeleteSuccess();
     }

@@ -1,8 +1,7 @@
-package ktb.week4.community.security.service;
+package ktb.week4.community.security.principal;
 
 import ktb.week4.community.domain.user.entity.User;
 import ktb.week4.community.domain.user.loader.UserLoader;
-import ktb.week4.community.security.CustomUserDetails;
 import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

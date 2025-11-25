@@ -1,7 +1,6 @@
-package ktb.week4.community.security;
+package ktb.week4.community.security.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ktb.week4.community.global.apiPayload.ApiResponse;

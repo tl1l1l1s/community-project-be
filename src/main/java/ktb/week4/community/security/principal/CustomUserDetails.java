@@ -1,4 +1,4 @@
-package ktb.week4.community.security;
+package ktb.week4.community.security.principal;
 
 import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;

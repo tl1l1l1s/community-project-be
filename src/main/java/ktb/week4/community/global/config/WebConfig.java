@@ -1,4 +1,4 @@
-package ktb.week4.community.config;
+package ktb.week4.community.global.config;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;

@@ -6,6 +6,7 @@ import ktb.week4.community.domain.comment.dto.GetCommentsResponseDto;
 import ktb.week4.community.domain.comment.dto.UpdateCommentRequestDto;
 import ktb.week4.community.domain.comment.service.CommentCommandService;
 import ktb.week4.community.domain.comment.service.CommentQueryService;
+import ktb.week4.community.global.annotation.AuthUser;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.SuccessCode;
 import ktb.week4.community.global.apiSpecification.CommentApiSpecification;
@@ -33,7 +34,7 @@ public class CommentController implements CommentApiSpecification {
 	@Override
 	@PostMapping
 	public ApiResponse<CommentResponseDto> createComment(
-			@PathVariable Long articleId, @RequestParam Long userId,
+			@PathVariable Long articleId, @AuthUser Long userId,
 			@RequestBody CreateCommentRequestDto request) {
 		return ApiResponse.onCreateSuccess(SuccessCode.CREATE_SUCCESS, commentCommandService.createComment(userId, articleId, request));
 	}
@@ -42,7 +43,7 @@ public class CommentController implements CommentApiSpecification {
 	@PatchMapping("/{commentId}")
 	public ApiResponse<CommentResponseDto> updateComment(
 			@PathVariable Long articleId,
-			@PathVariable Long commentId, @RequestParam Long userId,
+			@PathVariable Long commentId, @AuthUser Long userId,
 			@RequestBody UpdateCommentRequestDto request) {
 		return ApiResponse.onSuccess(SuccessCode.UPDATE_SUCCESS, commentCommandService.updateComment(articleId, userId, commentId, request));
 	}
@@ -52,7 +53,7 @@ public class CommentController implements CommentApiSpecification {
 	public ResponseEntity<Void> deleteComment(
 			@PathVariable Long articleId,
 			@PathVariable Long commentId,
-			@RequestParam Long userId) {
+			@AuthUser Long userId) {
 		commentCommandService.deleteComment(articleId, userId, commentId);
 		return ApiResponse.onDeleteSuccess();
 	}

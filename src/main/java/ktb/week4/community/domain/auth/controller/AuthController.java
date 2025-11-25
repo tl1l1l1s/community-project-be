@@ -5,7 +5,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import ktb.week4.community.domain.user.dto.LoginRequestDto;
 import ktb.week4.community.domain.user.dto.LoginResponseDto;
-import ktb.week4.community.domain.user.service.UserQueryService;
 import ktb.week4.community.global.apiPayload.ApiResponse;
 import ktb.week4.community.global.apiPayload.ErrorCode;
 import ktb.week4.community.global.apiPayload.SuccessCode;
@@ -24,7 +23,6 @@ import java.util.Arrays;
 @AllArgsConstructor
 public class AuthController implements AuthApiSpecification {
 	
-	private final UserQueryService userQueryService;
 	private final JwtTokenProvider jwtTokenProvider;
 	
 	@Override
@@ -35,9 +33,7 @@ public class AuthController implements AuthApiSpecification {
 	
 	@Override
 	@PostMapping("/logout")
-	public ResponseEntity<Void> logout(
-			@RequestParam Long userId) {
-		userQueryService.logout(userId);
+	public ResponseEntity<Void> logout() {
 		return ApiResponse.onDeleteSuccess();
 	}
 	

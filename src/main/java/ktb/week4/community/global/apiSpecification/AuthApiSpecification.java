@@ -1,7 +1,6 @@
 package ktb.week4.community.global.apiSpecification;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,8 +21,7 @@ public interface AuthApiSpecification {
 	@ApiResponses({
 			@io.swagger.v3.oas.annotations.responses.ApiResponse(responseCode = "204", description = "로그아웃 성공"),
 	})
-	ResponseEntity<Void> logout(
-			@Parameter(description = "로그아웃 할 사용자의 id", required = true, example = "1") Long userId);
+	ResponseEntity<Void> logout();
 	
 	@Operation(summary = "리프레시 토큰을 받아옵니다.")
 	@ApiResponses({

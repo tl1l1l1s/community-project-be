@@ -46,13 +46,31 @@ public class SecurityConfig {
 				)
 				.authorizeHttpRequests(auth -> auth
 						.requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-resources/**").permitAll()
-						.requestMatchers(HttpMethod.POST, "/auth/login/**",  "/users/**").anonymous()
+						.requestMatchers(HttpMethod.POST, "/auth/login/**", "/users/**").anonymous()
 						.requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
 						.requestMatchers(HttpMethod.GET, "/articles/**").permitAll()
 						.anyRequest().authenticated()
 				)
 				.addFilterAt(jsonAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
-				.addFilterAt(new JwtFilter(objectMapper, jwtTokenProvider), AuthorizationFilter.class);
+				.addFilterAt(new JwtFilter(objectMapper, jwtTokenProvider), AuthorizationFilter.class)
+				.logout(logout -> {
+					logout
+							.logoutUrl("/auth/logout")
+							.logoutSuccessHandler((request, response, authentication) -> {
+								response.setStatus(204);
+								response.setContentType("application/json;charset=UTF-8");
+							})
+							.addLogoutHandler((request, response, authentication) -> {
+								ResponseCookie refreshToken = ResponseCookie.from("refreshToken", "")
+										.path("/auth/")
+										.maxAge(0)
+										.httpOnly(true)
+										.sameSite("Strict")
+										.build();
+								response.addHeader(HttpHeaders.SET_COOKIE, refreshToken.toString());
+							})
+							.deleteCookies("accessToken");
+				});
 		
 		return http.build();
 	}

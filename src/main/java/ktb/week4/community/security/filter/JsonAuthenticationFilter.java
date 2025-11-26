@@ -30,15 +30,12 @@ public class JsonAuthenticationFilter extends AbstractAuthenticationProcessingFi
 	public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response)
 			throws AuthenticationException, IOException {
 		
-		// 요청의 Content-Type 확인
 		if(request.getContentType() != null && !request.getContentType().equals("application/json")) {
 			throw new AuthenticationServiceException("Not supported Content-Type :  " + request.getContentType());
 		}
 		
-		// JSON 객체를 LoginRequestDto로 파싱
 		LoginRequestDto loginReqDto = objectMapper.readValue(request.getInputStream(), LoginRequestDto.class);
 		
-		// AuthenticationManager에게 Authenticate를 시킨다.
 		return this.getAuthenticationManager().authenticate(
 				UsernamePasswordAuthenticationToken.unauthenticated(
 						loginReqDto.email(), loginReqDto.password()

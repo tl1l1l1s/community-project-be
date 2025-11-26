@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+	Boolean existsByEmail(String email);
+	Boolean existsByNickname(String nickname);
 	Optional<User> findByEmail(String email);
-	Optional<User> findByNickname(String nickname);
 	List<User> findAllByIdIn(List<Long> userIds);
 }

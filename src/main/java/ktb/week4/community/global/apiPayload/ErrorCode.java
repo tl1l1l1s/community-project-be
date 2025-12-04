@@ -22,14 +22,14 @@ public enum ErrorCode implements BaseErrorCode {
 	FILE_DELETE_ERROR(HttpStatus.CONFLICT, "AUTH409", "file_delete_error"),
 	
 	// 유저
-	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER4004", "User not found"),
+	USER_NOT_FOUND(HttpStatus.NOT_FOUND, "USER404", "User not found"),
 	
 	// 게시글
-	ARTICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ARTICLE4004", "Article not found"),
+	ARTICLE_NOT_FOUND(HttpStatus.NOT_FOUND, "ARTICLE404", "Article not found"),
 	
 	// 댓글
-	COMMENT_NOT_BELONG_TO_ARTICLE(HttpStatus.NOT_FOUND, "COMMENT4000", "Comment does not belong to article"),
-	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT4004", "Comment not found"),
+	COMMENT_NOT_BELONG_TO_ARTICLE(HttpStatus.NOT_FOUND, "COMMENT400", "Comment does not belong to article"),
+	COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "COMMENT404", "Comment not found"),
 	;
 	
 	private final HttpStatus httpStatus;

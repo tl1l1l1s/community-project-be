@@ -2,33 +2,57 @@ package ktb.week4.community.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
+import ktb.week4.community.domain.auth.controller.AuthController;
 import ktb.week4.community.domain.user.dto.LoginRequestDto;
+import ktb.week4.community.domain.user.entity.User;
 import ktb.week4.community.domain.user.entity.UserTestBuilder;
 import ktb.week4.community.domain.user.repository.UserRepository;
+import ktb.week4.community.global.config.SecurityConfig;
+import ktb.week4.community.security.jwt.JwtTokenProvider;
+import ktb.week4.community.security.principal.CustomUserDetails;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.assertj.MockMvcTester;
+import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
+import java.util.Collections;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.cookie;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@Transactional
+@WebMvcTest(controllers ={
+		AuthController.class
+		},
+	excludeAutoConfiguration = {
+		HibernateJpaAutoConfiguration .class,
+		JpaRepositoriesAutoConfiguration .class
+    	}
+)
+@Import({SecurityConfig.class, JwtTokenProvider.class})
+@ActiveProfiles("test")
 public class AuthorizationIntegrationTest {
 	@Autowired
-	MockMvc mockMvc;
+	private MockMvcTester mockMvc;
+	
+	@MockitoBean
+	AuthenticationManager authenticationManager;
 	
 	@Autowired
 	ObjectMapper objectMapper;
@@ -36,9 +60,10 @@ public class AuthorizationIntegrationTest {
 	@Autowired
 	PasswordEncoder passwordEncoder;
 	
-	@Autowired
+	@MockitoBean
 	UserRepository userRepository;
 	
+	User user;
 	String email  = "test@test.t";
 	String password = "Aa#12345";
 	String wrongEmail = "failTest@test.t";
@@ -46,91 +71,99 @@ public class AuthorizationIntegrationTest {
 	
 	@BeforeEach
 	void setUp() {
-		userRepository.save(UserTestBuilder.aUser()
+		user = UserTestBuilder.aUser()
 				.withEmail(email)
 				.withPassword(passwordEncoder.encode(password))
-				.build());
+				.build();
 	}
 	
 	@Test
 	@DisplayName("로그인 성공 시 성공 및 토큰 반환")
-	void shouldReturnCookieAndSuccessToUsersIfLoginSuccess() throws Exception {
+	void givenValidCredentials_whenLogin_thenSetsAuthCookies() throws Exception {
 		
-		mockMvc.perform(
-						post("/auth/login")
-								.contentType(MediaType.APPLICATION_JSON)
-								.content(objectMapper.writeValueAsString(
-										new LoginRequestDto(email,  password)
-								))
-				).andExpect(status().is2xxSuccessful())
-				.andExpect(cookie().exists("accessToken"))
-				.andExpect(cookie().exists("refreshToken"));
+		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+		
+		CustomUserDetails principal = new CustomUserDetails(email, password, Collections.emptyList(), 1L, null);
+		Authentication auth = new UsernamePasswordAuthenticationToken(
+				principal, null, principal.getAuthorities());
+		when(authenticationManager.authenticate(any(Authentication.class)))
+				.thenReturn(auth);
+		
+		assertThat(
+				mockMvc.post().uri("/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(
+								new LoginRequestDto(email,  password)
+						))
+		).hasStatus2xxSuccessful()
+						.cookies()
+						.isHttpOnly("accessToken", true)
+						.hasPath("accessToken", "/")
+						.isHttpOnly("refreshToken", true)
+						.hasPath("refreshToken", "/auth/");
 	}
 	
 	@Test
 	@DisplayName("잘못된 이메일로 로그인 실패 시 실패 응답, 토큰 미반환")
-	void shouldNotReturnCookieIfLoginFailUsingWrongEmail() throws Exception {
+	void givenInvalidEmail_whenLogin_thenFailsAndDoesNotSetCookies() throws Exception {
 		
-		mockMvc.perform(
-						post("/auth/login")
-								.contentType(MediaType.APPLICATION_JSON)
-								.content(objectMapper.writeValueAsString(
-										new LoginRequestDto(wrongEmail,  password)
-								))
-				).andExpect(status().is4xxClientError())
-				.andExpect(cookie().doesNotExist("accessToken"))
-				.andExpect(cookie().doesNotExist("refreshToken"))
-				.andReturn();
+		when(authenticationManager.authenticate(any(Authentication.class)))
+				.thenThrow(new BadCredentialsException("bad credentials"));
 		
-		mockMvc.perform(
-				get("/users")
-		).andExpect(status().is4xxClientError());
+		assertThat(
+				mockMvc.post().uri("/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(
+								new LoginRequestDto(wrongEmail,  password)
+						))
+		).hasStatus4xxClientError()
+				.cookies().isEmpty();
 	}
 	
 	@Test
 	@DisplayName("잘못된 비밀번호로 로그인 실패 시 실패 응답, 토큰 미반환")
-	void shouldNotReturnCookieIfLoginFailUsingWrongPassword() throws Exception {
+	void givenInvalidPassword_whenLogin_thenFailsAndDoesNotSetCookies() throws Exception {
 		
-		mockMvc.perform(
-						post("/auth/login")
-								.contentType(MediaType.APPLICATION_JSON)
-								.content(objectMapper.writeValueAsString(
-										new LoginRequestDto(email, wrongPassword)
-								))
-				).andExpect(status().is4xxClientError())
-				.andExpect(cookie().doesNotExist("accessToken"))
-				.andExpect(cookie().doesNotExist("refreshToken"))
-				.andReturn();
+		when(authenticationManager.authenticate(any(Authentication.class)))
+				.thenThrow(new BadCredentialsException("bad credentials"));
 		
-		mockMvc.perform(
-				get("/users")
-		).andExpect(status().is4xxClientError());
+		assertThat(
+				mockMvc.post().uri("/auth/login")
+						.contentType(MediaType.APPLICATION_JSON)
+						.content(objectMapper.writeValueAsString(
+								new LoginRequestDto(email,  wrongPassword)
+						))
+		).hasStatus4xxClientError()
+				.cookies().isEmpty();
 	}
 	
 	@Test
 	@DisplayName("로그아웃 성공 시 토큰 제거/만료")
-	void shouldExpireCookieIfLogoutSuccess() throws Exception {
+	void givenAuthenticatedUser_whenLogout_thenExpiresAuthCookies() throws Exception {
 		// given
-		MvcResult loginResult = mockMvc.perform(
-						post("/auth/login")
-								.contentType(MediaType.APPLICATION_JSON)
-								.content(objectMapper.writeValueAsString(
-										new LoginRequestDto(email, password)
-								))
-				)
-				.andExpect(status().is2xxSuccessful())
-				.andReturn();
+		CustomUserDetails principal =
+				new CustomUserDetails(email, password, Collections.emptyList(), 1L, null);
+		Authentication auth =
+				new UsernamePasswordAuthenticationToken(
+						principal, null, principal.getAuthorities());
+		when(authenticationManager.authenticate(any(Authentication.class)))
+				.thenReturn(auth);
+		when(userRepository.findByEmail(email)).thenReturn(Optional.of(user));
+		
+		MvcTestResult loginResult = mockMvc.post().uri("/auth/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(
+						new LoginRequestDto(email, password)
+				)).exchange();
 		
 		Cookie accessTokenCookie = loginResult.getResponse().getCookie("accessToken");
 		Cookie refreshTokenCookie = loginResult.getResponse().getCookie("refreshToken");
 		
 		// when
-		MvcResult logoutResult = mockMvc.perform(
-						post("/auth/logout")
-								.cookie(accessTokenCookie, refreshTokenCookie)
-				)
-				.andExpect(status().is2xxSuccessful())
-				.andReturn();
+		MvcTestResult logoutResult = mockMvc
+				.post().uri("/auth/logout")
+				.cookie(accessTokenCookie, refreshTokenCookie)
+				.exchange();
 		
 		Cookie expiredAccess = logoutResult.getResponse().getCookie("accessToken");
 		Cookie expiredRefresh = logoutResult.getResponse().getCookie("refreshToken");

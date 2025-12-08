@@ -27,7 +27,7 @@ public class FileStorageService {
 	public String store(MultipartFile file, String directory) {
 		if (file == null || file.isEmpty() ||
 				file.getContentType() == null || file.getContentType().isEmpty() ||
-				file.getOriginalFilename() != null || file.getOriginalFilename().isEmpty()) {
+				file.getOriginalFilename() == null || file.getOriginalFilename().isEmpty()) {
 			return null;
 		}
 		

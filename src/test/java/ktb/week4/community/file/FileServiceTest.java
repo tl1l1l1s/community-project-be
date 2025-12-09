@@ -8,8 +8,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -82,17 +85,23 @@ public class FileServiceTest {
 		assertNull(res);
 	}
 	
-	
-	@Test
+	@ParameterizedTest
+	@ValueSource(strings = {
+			"application/json",
+			"text/plain",
+			"application/pdf",
+			"application/x-msdownload",
+			"application/octet-stream"
+	})
 	@DisplayName("업로드 한 파일의 형태가 image~가 아닌 경우 FILE_FORMAT_ERROR를 받는다.")
-	void givenWrongFormatFile_whenUploadFile_thenThrowsFileFormatException() {
+	void givenWrongFormatFile_whenUploadFile_thenThrowsFileFormatException(String contentType) {
 	
 		// given
 		byte[] content = "test-json".getBytes();
 		MockMultipartFile mockFile = new MockMultipartFile(
 				"file",
-				"image.json",
-				"application/json",
+				"file.bin",
+				contentType,
 				content
 		);
 		
@@ -102,6 +111,62 @@ public class FileServiceTest {
 		
 		//then
 		assertEquals(ErrorCode.FILE_FORMAT_ERROR, exc.getErrorCode());
+	}
+	
+	@Test
+	@DisplayName("파일 저장 중 예외가 발생하면 FILE_UPLOAD_ERROR를 받는다.")
+	void givenIoFailure_whenUploadFile_thenThrowsFileUploadError() {
+		// given
+		MultipartFile brokenFile = new MultipartFile() {
+			@Override
+			public String getName() {
+				return "file";
+			}
+			
+			@Override
+			public String getOriginalFilename() {
+				return "broken.png";
+			}
+			
+			@Override
+			public String getContentType() {
+				return "image/png";
+			}
+			
+			@Override
+			public boolean isEmpty() {
+				return false;
+			}
+			
+			@Override
+			public long getSize() {
+				return 1L;
+			}
+			
+			@Override
+			public byte[] getBytes() {
+				return new byte[0];
+			}
+			
+			@Override
+			public java.io.InputStream getInputStream() throws IOException {
+				throw new IOException("cannot read");
+			}
+			
+			@Override
+			public void transferTo(java.io.File dest) {
+				throw new UnsupportedOperationException();
+			}
+		};
+		
+		// when
+		GeneralException exc = assertThrows(
+				GeneralException.class,
+				() -> fileStorageService.store(brokenFile, "test")
+		);
+		
+		// then
+		assertEquals(ErrorCode.FILE_UPLOAD_ERROR, exc.getErrorCode());
 	}
 	
 	@Test
@@ -125,5 +190,23 @@ public class FileServiceTest {
 		
 		// then
 		assertFalse(Files.exists(targetFile));
+	}
+	
+	@Test
+	@DisplayName("존재하지 않는 이미지 삭제 시 FILE_DELETE_ERROR를 받는다.")
+	void givenInvalidImageUrl_whenDeleteFile_thenThrowsFile_Delete_Error() throws IOException {
+		
+		// given
+		Path dir = uploadRoot.resolve("not-empty-dir");
+		Files.createDirectories(dir);
+		Files.createFile(dir.resolve("dummy.txt"));
+
+		// when
+		GeneralException exc = assertThrows(GeneralException.class,
+				() -> fileStorageService.delete("/uploads/not-empty-dir")
+		);
+		
+		// then
+		assertEquals(ErrorCode.FILE_DELETE_ERROR, exc.getErrorCode());
 	}
 }
